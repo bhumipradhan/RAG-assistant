@@ -45,9 +45,10 @@ app/
   services/
     extraction.py            pdf/txt -> clean text
     chunking/                Chunker Protocol + fixed + recursive + registry
-    embeddings.py            Embedder Protocol + OpenAI + FastEmbed (local)
+    embeddings.py            Embedder Protocol + OpenAI + Gemini + FastEmbed (local)
     vector_store.py          VectorStore Protocol + Qdrant implementation
-    llm.py                   LLMClient Protocol + OpenAI + Anthropic
+    llm.py                   LLMClient Protocol + OpenAI + Anthropic + Gemini
+    retry.py                 exponential backoff for rate-limited APIs
     ingestion.py             ingestion pipeline (idempotent, compensating)
     memory.py                Redis chat history + booking state
     prompts.py               all prompt text in one place
@@ -56,7 +57,7 @@ app/
     booking.py               slot filling, validation, confirmation, persistence
     chat.py                  chat orchestration
   db/                        SQLAlchemy 2.0 models, session, repositories
-tests/                       25 tests, fully offline (fake LLM/embedder, in-memory Qdrant & Redis)
+tests/                       33 tests, fully offline (fake LLM/embedder, in-memory Qdrant & Redis)
 ```
 
 ## 3. Run it
@@ -83,12 +84,17 @@ Or everything in Docker: `docker compose up --build`.
 
 ### Providers
 
-| You have | Set in `.env` |
-|---|---|
-| OpenAI key only | `OPENAI_API_KEY=...` (defaults work) |
-| Anthropic key only | `LLM_PROVIDER=anthropic`, `LLM_MODEL=claude-sonnet-5-5`, `ANTHROPIC_API_KEY=...`, plus local embeddings: `pip install fastembed`, `EMBEDDING_PROVIDER=fastembed`, `EMBEDDING_MODEL=BAAI/bge-small-en-v1.5`, `EMBEDDING_DIMENSION=384` (Anthropic has no embeddings API) |
+Set these in `.env` (see `.env.example`). Pick one row:
 
-> `EMBEDDING_DIMENSION` must match the embedding model. If you change models, use a new `QDRANT_COLLECTION` name.
+| You have | `LLM_PROVIDER` | `EMBEDDING_PROVIDER` | Notes |
+|---|---|---|---|
+| **Gemini key** (free tier, AI Studio) | `gemini` | `gemini` | One key for chat and embeddings. Use `EMBEDDING_DIMENSION=768`. |
+| OpenAI key (paid prepaid credits) | `openai` | `openai` | `EMBEDDING_DIMENSION=1536` |
+| Anthropic key | `anthropic` | `fastembed` | Anthropic has no embeddings API. `pip install fastembed`, dimension `384`. |
+
+> `EMBEDDING_DIMENSION` must match the embedding model. If you change embedding model or dimension, use a new `QDRANT_COLLECTION` name (a collection has a fixed vector size).
+
+**Gemini free tier notes:** it is rate limited, and Google's pricing page says free-tier requests may be used to improve Google products, so do not upload confidential documents. Rate-limit errors (HTTP 429) are retried automatically with exponential backoff (`services/retry.py`). Model names change over time; if you get a "model not found" error, pick a current model in AI Studio and set `LLM_MODEL`.
 
 ## 4. Try it
 
@@ -112,7 +118,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/chat -H "Content-Type: application/jso
 ## 5. Tests and quality gates
 
 ```bash
-pytest -q          # 25 tests, no network, no API keys needed
+pytest -q          # 33 tests, no network, no API keys needed
 mypy app           # strict typing
 ruff check .       # lint
 ```

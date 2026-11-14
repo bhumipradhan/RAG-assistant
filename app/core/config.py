@@ -10,11 +10,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class LLMProvider(StrEnum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
+    GEMINI = "gemini"
 
 
 class EmbeddingProvider(StrEnum):
     OPENAI = "openai"
     FASTEMBED = "fastembed"
+    GEMINI = "gemini"
 
 
 class Settings(BaseSettings):
@@ -27,6 +29,7 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
+    gemini_api_key: SecretStr | None = None
 
     # Embeddings
     embedding_provider: EmbeddingProvider = EmbeddingProvider.OPENAI

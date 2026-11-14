@@ -10,5 +10,6 @@ redis>=5.0
 pypdf>=4.0
 openai>=1.40
 anthropic>=0.40
-tzdata>=2024.1
+google-genai>=1.0
+tzdata>=2024.1  # Windows has no system timezone database
 # Optional local embeddings (no API key needed): pip install fastembed
