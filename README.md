@@ -8,7 +8,11 @@ Two REST APIs built with FastAPI:
 No FAISS, no Chroma, no UI.
 
 ---
+## How this was built
 
+I built this project with AI assistance (Claude) for scaffolding and debugging. I ran and
+tested it myself: the unit tests, plus manual runs against Qdrant, Redis and Gemini. I'm happy
+to walk through any part of the code and explain the design decisions.
 ## 1. How it works (the mental model)
 
 ```
@@ -150,3 +154,4 @@ ruff check .       # lint
 - No emails are actually sent on booking.
 - Chat history truncates at the last N messages (no summarization).
 - No endpoint to delete a document (the `delete_document` store method exists for it).
+- PDF text extraction can leave noisy whitespace (for example, one word per line) on some PDFs, which can lower retrieval quality.
