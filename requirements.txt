@@ -10,4 +10,5 @@ redis>=5.0
 pypdf>=4.0
 openai>=1.40
 anthropic>=0.40
+tzdata>=2024.1
 # Optional local embeddings (no API key needed): pip install fastembed
