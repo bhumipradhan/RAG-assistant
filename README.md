@@ -13,6 +13,7 @@ No FAISS, no Chroma, no UI.
 I built this project with AI assistance (Claude) for scaffolding and debugging. I ran and
 tested it myself: the unit tests, plus manual runs against Qdrant, Redis and Gemini. I'm happy
 to walk through any part of the code and explain the design decisions.
+
 ## 1. How it works (the mental model)
 
 ```
