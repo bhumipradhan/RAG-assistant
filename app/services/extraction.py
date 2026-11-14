@@ -20,12 +20,13 @@ def detect_file_type(filename: str) -> FileType:
     except ValueError as exc:
         raise UnsupportedFileTypeError("Only .pdf and .txt files are supported.") from exc
 
-
 def _normalize(text: str) -> str:
     text = text.replace("\r\n", "\n").replace("\x00", "")
+    text = re.sub(r"(?:\n[ \t]*){3,}", "\n\n", text)  # 3+ newlines = paragraph break
+    text = re.sub(r"\n[ \t]+\n", " ", text)           # "word \n \n word" = just a space
     text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"[ \t]*\n[ \t]*", "\n", text)
     return re.sub(r"\n{3,}", "\n\n", text).strip()
-
 
 def _extract_pdf(data: bytes) -> str:
     # Validate content, not just the extension.

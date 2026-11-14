@@ -11,7 +11,7 @@ from openai import OpenAI, OpenAIError
 
 from app.core.config import EmbeddingProvider, Settings
 from app.core.exceptions import ExternalServiceError
-from app.services.llm import is_retryable_gemini_error
+from app.services.llm import gemini_client, is_retryable_gemini_error, is_timeout_error
 from app.services.retry import retry_call
 
 _OPENAI_BATCH = 100
@@ -66,9 +66,14 @@ class GeminiEmbedder:
     """
 
     def __init__(
-        self, api_key: str, model: str, dimension: int, client: genai.Client | None = None
+        self,
+        api_key: str,
+        model: str,
+        dimension: int,
+        client: genai.Client | None = None,
+        timeout_seconds: int = 30,
     ) -> None:
-        self._client = client or genai.Client(api_key=api_key)
+        self._client = client or gemini_client(api_key, timeout_seconds)
         self._model = model
         self._dimension = dimension
 
@@ -93,6 +98,12 @@ class GeminiEmbedder:
                 raise ExternalServiceError(
                     f"Embedding provider error ({exc.code}): {exc.message}"
                 ) from exc
+            except Exception as exc:
+                if is_timeout_error(exc):
+                    raise ExternalServiceError(
+                        "The embedding provider timed out. Try again shortly."
+                    ) from exc
+                raise
             for emb in resp.embeddings or []:
                 vectors.append(_normalize(emb.values or []))
         if len(vectors) != len(texts):
@@ -120,6 +131,7 @@ def build_embedder(settings: Settings) -> Embedder:
             settings.gemini_api_key.get_secret_value(),
             settings.embedding_model,
             settings.embedding_dimension,
+            timeout_seconds=settings.llm_timeout_seconds,
         )
     if settings.embedding_provider is EmbeddingProvider.FASTEMBED:
         return FastEmbedEmbedder(settings.embedding_model)

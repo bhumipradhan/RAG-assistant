@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # LLM
     llm_provider: LLMProvider = LLMProvider.OPENAI
     llm_model: str = "gpt-4o-mini"
+    llm_timeout_seconds: int = 30  # per request to the LLM / embedding provider (Gemini)
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
     gemini_api_key: SecretStr | None = None

@@ -57,7 +57,7 @@ app/
     booking.py               slot filling, validation, confirmation, persistence
     chat.py                  chat orchestration
   db/                        SQLAlchemy 2.0 models, session, repositories
-tests/                       33 tests, fully offline (fake LLM/embedder, in-memory Qdrant & Redis)
+tests/                       37 tests, fully offline (fake LLM/embedder, in-memory Qdrant & Redis)
 ```
 
 ## 3. Run it
@@ -94,7 +94,7 @@ Set these in `.env` (see `.env.example`). Pick one row:
 
 > `EMBEDDING_DIMENSION` must match the embedding model. If you change embedding model or dimension, use a new `QDRANT_COLLECTION` name (a collection has a fixed vector size).
 
-**Gemini free tier notes:** it is rate limited, and Google's pricing page says free-tier requests may be used to improve Google products, so do not upload confidential documents. Rate-limit errors (HTTP 429) are retried automatically with exponential backoff (`services/retry.py`). Model names change over time; if you get a "model not found" error, pick a current model in AI Studio and set `LLM_MODEL`.
+**Gemini free tier notes:** it is rate limited, and Google's pricing page says free-tier requests may be used to improve Google products, so do not upload confidential documents. Rate-limit errors (HTTP 429) are retried automatically with exponential backoff (`services/retry.py`). Model names change over time and busy models return 503. Run `python -m scripts.check_models` to test which models respond right now with your key, then set `LLM_MODEL`. Requests time out after `LLM_TIMEOUT_SECONDS` (default 30) and are retried with backoff before returning a clean 503.
 
 ## 4. Try it
 
@@ -118,7 +118,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/chat -H "Content-Type: application/jso
 ## 5. Tests and quality gates
 
 ```bash
-pytest -q          # 33 tests, no network, no API keys needed
+pytest -q          # 37 tests, no network, no API keys needed
 mypy app           # strict typing
 ruff check .       # lint
 ```
