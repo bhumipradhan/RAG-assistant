@@ -12,7 +12,7 @@ router = APIRouter(prefix="/documents", tags=["ingestion"])
 
 # Plain `def` (not `async def`): FastAPI runs it in a thread pool, so blocking work
 # (PDF parsing, embedding HTTP calls, DB writes) does not freeze the event loop.
-@router.post("", response_model=DocumentOut, status_code=201)
+@router.post("", response_model=DocumentOut, status_code=201, responses={200: {"model": DocumentOut, "description": "File already ingested (duplicate)"}},)
 def upload_document(
     file: Annotated[UploadFile, File(description=".pdf or .txt file")],
     service: Annotated[IngestionService, Depends(get_ingestion_service)],
