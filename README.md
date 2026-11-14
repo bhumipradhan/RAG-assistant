@@ -94,8 +94,6 @@ Set these in `.env` (see `.env.example`). Pick one row:
 | You have | `LLM_PROVIDER` | `EMBEDDING_PROVIDER` | Notes |
 |---|---|---|---|
 | **Gemini key** (free tier, AI Studio) | `gemini` | `gemini` | One key for chat and embeddings. Use `EMBEDDING_DIMENSION=768`. |
-| OpenAI key (paid prepaid credits) | `openai` | `openai` | `EMBEDDING_DIMENSION=1536` |
-| Anthropic key | `anthropic` | `fastembed` | Anthropic has no embeddings API. `pip install fastembed`, dimension `384`. |
 
 > `EMBEDDING_DIMENSION` must match the embedding model. If you change embedding model or dimension, use a new `QDRANT_COLLECTION` name (a collection has a fixed vector size).
 
@@ -128,7 +126,7 @@ mypy app           # strict typing
 ruff check .       # lint
 ```
 
-## 6. Design decisions (know these for the interview)
+## 6. Design decisions
 
 | Decision | Why | Trade-off |
 |---|---|---|
@@ -145,7 +143,7 @@ ruff check .       # lint
 | Unique constraint on (date, time) | Race-safe double-booking protection enforced by the DB | One interviewer assumed |
 | Redis errors -> HTTP 503 | Clear failure mode instead of a stack trace | No fallback memory (stateless degraded mode would be a future improvement) |
 
-## 7. Known limitations (honest list)
+## 7. Known limitations
 
 - Scanned/image PDFs are rejected (no OCR).
 - Chunking is character-based, not token-based.
